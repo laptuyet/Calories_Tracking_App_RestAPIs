@@ -1,0 +1,25 @@
+package com.caloriestracking.service;
+
+import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import com.caloriestracking.model.Category;
+
+public interface CategoryService {
+	
+	Category findById(Long id);
+	
+	Category findByCategoryName(String categoryName);
+
+	List<Category> findAll();
+
+	Category save(Category category, MultipartFile file);
+
+	Category update(Category category, MultipartFile file);
+
+	void delete(String categoryName);
+	
+	void delete(Long id);
+
+}
