@@ -136,33 +136,37 @@ public class FoodTrackingServiceImpl implements FoodTrackingService {
 		reportResult.setColumnData(columnData);
 		
 		// Max calorie
-		reportResult.setMax(BigDecimal.valueOf(userFoodTrackings
+		reportResult.setMax(BigDecimal.valueOf(columnData
+				.values()
 				.stream()
-				.max((t1, t2) -> t1.getConsumedGram().compareTo(t2.getConsumedGram()))
-				.map(t -> t.getConsumedGram().doubleValue() / 100.0 * t.getFood().getEnergyPerServing().doubleValue())
-				.get())
+				.mapToDouble(t-> t.doubleValue())
+				.max()
+				.getAsDouble())
 		);
 		
 		// Min calorie
-		reportResult.setMin(BigDecimal.valueOf(userFoodTrackings
+		reportResult.setMin(BigDecimal.valueOf(columnData
+				.values()
 				.stream()
-				.min((t1, t2) -> t1.getConsumedGram().compareTo(t2.getConsumedGram()))
-				.map(t -> t.getConsumedGram().doubleValue() / 100.0 * t.getFood().getEnergyPerServing().doubleValue())
-				.get())
+				.mapToDouble(t-> t.doubleValue())
+				.min()
+				.getAsDouble())
 		);
 		
 		// Average calories
-		reportResult.setAverage(BigDecimal.valueOf(userFoodTrackings
+		reportResult.setAverage(BigDecimal.valueOf(columnData
+				.values()
 				.stream()
-				.mapToDouble(t -> t.getConsumedGram().doubleValue() / 100.0 * t.getFood().getEnergyPerServing().doubleValue())
-				.sum()
-				/ userFoodTrackings.size())
+				.mapToDouble(t -> t.doubleValue())
+				.average()
+				.getAsDouble())
 		);
 
 		// Total calories
-		reportResult.setTotal(BigDecimal.valueOf(userFoodTrackings
+		reportResult.setTotal(BigDecimal.valueOf(columnData
+				.values()
 				.stream()
-				.mapToDouble(t -> t.getConsumedGram().doubleValue() / 100.0 * t.getFood().getEnergyPerServing().doubleValue())
+				.mapToDouble(t -> t.doubleValue())
 				.sum())
 		);
 
