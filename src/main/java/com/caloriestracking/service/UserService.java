@@ -2,6 +2,7 @@ package com.caloriestracking.service;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.caloriestracking.model.User;
@@ -18,7 +19,5 @@ public interface UserService {
 
 	User update(User user, MultipartFile file);
 
-	void delete(Long userId);
-
-	void delete(String username);
+	ResponseEntity<String> delete(Long userId);
 }

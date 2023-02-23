@@ -1,6 +1,7 @@
 package com.caloriestracking.model;
 
-import java.util.Date;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,8 +10,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -32,8 +33,8 @@ public class UserFoodTracking {
 	@JoinColumn(name = "food_id")
 	private Food food;
 	
-	private Double consumedGram;
+	private BigDecimal consumedGram;
 	
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date consumedDatetime;
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	private LocalDateTime consumedDatetime;
 }

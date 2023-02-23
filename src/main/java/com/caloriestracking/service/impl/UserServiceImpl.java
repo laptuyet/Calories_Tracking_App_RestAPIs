@@ -2,12 +2,15 @@ package com.caloriestracking.service.impl;
 
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,6 +27,7 @@ import com.caloriestracking.validator.ObjectsValidator;
 import lombok.RequiredArgsConstructor;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService{
 	
@@ -67,12 +71,13 @@ public class UserServiceImpl implements UserService{
 //			}
 //		}
 		
+		// Kiểm tra xem account có trong json hay không
 		Account account = user.getAccount();
 		if (account != null) {
 			if(account.getUsername() != null || !account.getUsername().isBlank()) {
 				if(accountService.checkUsernameLinkWithUser(account.getUsername()))
 					throw new ExistingResourceException("Account with username <" + account.getUsername() 
-														+ "> is linked with a User");
+														+ "> is linked with another User");
 			} else
 				throw new ResourceNotFoundException(
 					" 'username' field of this account is empty or blank, must specify username for this account");
@@ -80,6 +85,7 @@ public class UserServiceImpl implements UserService{
 			throw new ResourceNotFoundException(" 'account' field is not included in this user JSON, "
 					+ "\n please create new account and then assign to this user");
 		
+		// Nếu có ảnh thì setImage cho user đó
 		if (file != null && !file.isEmpty()) {
 			String imageURL = cloudinaryService.uploadImage(file);
 			user.setImage(imageURL);
@@ -88,26 +94,40 @@ public class UserServiceImpl implements UserService{
 		user.setAccount(account);
 		
 		return userRepository.save(user);
-		
-		// đổi mapping user -> account ở cột username trong user class
 	}
 
 	@Override
 	public User update(User user, MultipartFile file) {
-		// TODO Auto-generated method stub
-		return null;
+		log.info("Validate object: " + user);
+		validator.validate(user);
+		
+		User foundUser = userRepository.findById(user.getId()).orElseThrow(
+				() -> new ResourceNotFoundException("User with id <" + user.getId() + "> not found"));
+
+		if (file != null && !file.isEmpty()) {
+			String imageURL = cloudinaryService.uploadImage(file);
+			foundUser.setImage(imageURL);
+		}
+		
+		foundUser.setFirstName(user.getFirstName());
+		foundUser.setLastName(user.getLastName());
+		foundUser.setDob(user.getDob());
+		foundUser.setGender(user.getGender());
+		foundUser.setWeight(user.getWeight());
+		foundUser.setHeight(user.getHeight());
+		foundUser.setEmail(user.getEmail());
+		
+		return userRepository.save(foundUser);
 	}
 
 	@Override
-	public void delete(Long userId) {
-		// TODO Auto-generated method stub
+	public ResponseEntity<String> delete(Long userId) {
 		
-	}
-
-	@Override
-	public void delete(String username) {
-		// TODO Auto-generated method stub
+		User user = findById(userId);
 		
+		Account account = accountService.findByUserName(user.getAccount().getUsername());
+		
+		return accountService.delete(account.getUsername());
 	}
 
 }

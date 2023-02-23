@@ -11,4 +11,6 @@ public interface UserFavoriteFoodRepository extends JpaRepository<UserFavoriteFo
 	List<UserFavoriteFood> findFavorListByFood_Id(Long foodId);
 	
 	List<UserFavoriteFood> findFavorListByUser_Id(Long userId);
+	
+	UserFavoriteFood findByUser_IdAndFood_Id(Long userId, Long foodId);
 }

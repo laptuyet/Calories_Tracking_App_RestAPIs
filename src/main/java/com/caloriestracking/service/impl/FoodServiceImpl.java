@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -60,6 +61,18 @@ public class FoodServiceImpl implements FoodService {
 	@Override
 	public List<Food> findAll() {
 		return foodRepository.findAll();
+	}
+	
+	@Override
+	public List<Food> findAllByCategory(Long cateId) {
+		return foodRepository.findAllByCategory_Id(cateId);
+	}
+	
+	@Override
+	public List<Food> findAllByCategory(Long cateId, Integer pageNo, Integer pageSize, String sortBy) {
+		Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
+		Slice<Food> slicePage = foodRepository.findAllByCategory_Id(cateId, paging);
+		return slicePage.getContent();
 	}
 
 	@Override
@@ -141,7 +154,7 @@ public class FoodServiceImpl implements FoodService {
 	}
 
 	@Override
-	public void delete(Long id) {
+	public ResponseEntity<String> delete(Long id) {
 		
 		findById(id);
 		
@@ -159,6 +172,7 @@ public class FoodServiceImpl implements FoodService {
 		}
 		
 		foodRepository.deleteById(id);
+		
+		return ResponseEntity.ok("Delete Food with <" + id + "> successfully!");
 	}
-
 }

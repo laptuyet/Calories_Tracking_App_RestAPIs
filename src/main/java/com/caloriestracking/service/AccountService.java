@@ -2,6 +2,8 @@ package com.caloriestracking.service;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
+
 import com.caloriestracking.model.Account;
 
 public interface AccountService {
@@ -10,12 +12,14 @@ public interface AccountService {
 	Boolean checkUsernameExist(String username);
 
 	List<Account> findAll();
+	
+	List<Account> findAll(Integer pageNo, Integer pageSize, String sortBy);
 
 	Account save(Account account);
 
 	Account update(Account account);
 
-	void delete(String username);
+	ResponseEntity<String> delete(String username);
 
 	Boolean checkUsernameLinkWithUser(String username);
 	

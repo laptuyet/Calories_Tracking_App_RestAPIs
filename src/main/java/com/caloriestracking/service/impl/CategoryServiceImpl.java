@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -100,13 +101,15 @@ public class CategoryServiceImpl implements CategoryService {
 	}
 	
 	@Override
-	public void delete(Long id) {
+	public ResponseEntity<String> delete(Long id) {
 		Category cate = findById(id);
 		if (!cate.getFoods().isEmpty()) {
 			throw new RuntimeException("Category with id <" + id + "> has foods list, can't be deleted");
 		}
 		
 		categoryRepository.deleteById(id);
+		
+		return ResponseEntity.ok("Delete Category with <" + id + "> successfully!");
 	}
 
 }
