@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class StatisticResponse {
 	
-	private Map<String, BigDecimal> columnDatas;
+	private Map<String, BigDecimal> columnData;
 	
 	private BigDecimal max;
 	

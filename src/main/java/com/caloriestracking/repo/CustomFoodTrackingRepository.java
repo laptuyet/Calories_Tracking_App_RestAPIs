@@ -40,15 +40,13 @@ public class CustomFoodTrackingRepository {
 		timePredicates.add(userIdEqual);
 		
 		// Tìm kiếm theo tuần
-		if (!reportType.isBlank()) {
-			if(reportType.equals("WEEK")) {
-				LocalDateTime firstDayOfTheWeek = CustomDateTimeUtils.getFirstDayOfWeek(localDateTime);
-				List<LocalDateTime> allDaysOfTheWeek = CustomDateTimeUtils.getAllDaysOfTheWeek(firstDayOfTheWeek);
-				LocalDateTime startDate = allDaysOfTheWeek.get(0);
-				LocalDateTime endDate = allDaysOfTheWeek.get(allDaysOfTheWeek.size() - 1);
-				Predicate betWeenDateTime = cb.between(root.get("consumedDatetime"), startDate, endDate);
-				timePredicates.add(betWeenDateTime);
-			}
+		if (reportType.equals("WEEK")) {
+			LocalDateTime firstDayOfTheWeek = CustomDateTimeUtils.getFirstDayOfWeek(localDateTime);
+			List<LocalDateTime> allDaysOfTheWeek = CustomDateTimeUtils.getAllDaysOfTheWeek(firstDayOfTheWeek);
+			LocalDateTime startDate = allDaysOfTheWeek.get(0);
+			LocalDateTime endDate = allDaysOfTheWeek.get(allDaysOfTheWeek.size() - 1);
+			Predicate betWeenDateTime = cb.between(root.get("consumedDatetime"), startDate, endDate);
+			timePredicates.add(betWeenDateTime);
 		} else {
 			// where DAY(user.consumedDatetime) = timeValues.get("DAY") AND ...
 			for (String timeKey : timeValues.keySet()) {

@@ -2,6 +2,7 @@ package com.caloriestracking.service.impl;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -11,7 +12,6 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.caloriestracking.dto.AppConstants;
 import com.caloriestracking.dto.StatisticResponse;
 import com.caloriestracking.exceptions.ResourceNotFoundException;
 import com.caloriestracking.model.Food;
@@ -22,6 +22,7 @@ import com.caloriestracking.repo.UserFoodTrackingRepository;
 import com.caloriestracking.service.FoodService;
 import com.caloriestracking.service.FoodTrackingService;
 import com.caloriestracking.service.UserService;
+import com.caloriestracking.utils.AppConstants;
 import com.caloriestracking.utils.CustomDateTimeUtils;
 
 import lombok.RequiredArgsConstructor;
@@ -79,18 +80,15 @@ public class FoodTrackingServiceImpl implements FoodTrackingService {
 
 		switch (reportType.trim().toUpperCase()) {
 		case "DAY": {
-			timeValues.put("HOUR", ldt.getHour());
-			timeValues.put("DAY", ldt.getDayOfMonth());
-			timeValues.put("MONTH", ldt.getMonthValue());
-			timeValues.put("YEAR", ldt.getYear());
-			break;
-		}
-
-		case "WEEK": {
 			timeValues.put("DAY", ldt.getDayOfMonth());
 			timeValues.put("MONTH", ldt.getMonthValue());
 			timeValues.put("YEAR", ldt.getYear());
 			
+			reportResult = createReport(userId, timeValues, ldt, "DAY");
+			break;
+		}
+
+		case "WEEK": {
 			reportResult = createReport(userId, timeValues, ldt, "WEEK");
 			break;
 		}
@@ -132,22 +130,41 @@ public class FoodTrackingServiceImpl implements FoodTrackingService {
 			throw new ResourceNotFoundException("Datas for this Datetime <" +
 					localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + "> is empty!");
 		
-		Map<String, BigDecimal> columndatas = getColumnDatasByTimeOption(userFoodTrackings, localDateTime , reportType);
+		Map<String, BigDecimal> columnData = getColumnDatasByTimeOption(userFoodTrackings, localDateTime , reportType);
 		
-		reportResult.setColumnDatas(columndatas);
+		// Column Data
+		reportResult.setColumnData(columnData);
 		
-		reportResult.setMax(userFoodTrackings.stream()
-				.max((t1, t2) -> t1.getConsumedGram().compareTo(t2.getConsumedGram())).get().getConsumedGram());
+		// Max calorie
+		reportResult.setMax(BigDecimal.valueOf(userFoodTrackings
+				.stream()
+				.max((t1, t2) -> t1.getConsumedGram().compareTo(t2.getConsumedGram()))
+				.map(t -> t.getConsumedGram().doubleValue() / 100.0 * t.getFood().getEnergyPerServing().doubleValue())
+				.get())
+		);
+		
+		// Min calorie
+		reportResult.setMin(BigDecimal.valueOf(userFoodTrackings
+				.stream()
+				.min((t1, t2) -> t1.getConsumedGram().compareTo(t2.getConsumedGram()))
+				.map(t -> t.getConsumedGram().doubleValue() / 100.0 * t.getFood().getEnergyPerServing().doubleValue())
+				.get())
+		);
+		
+		// Average calories
+		reportResult.setAverage(BigDecimal.valueOf(userFoodTrackings
+				.stream()
+				.mapToDouble(t -> t.getConsumedGram().doubleValue() / 100.0 * t.getFood().getEnergyPerServing().doubleValue())
+				.sum()
+				/ userFoodTrackings.size())
+		);
 
-		reportResult.setMin(userFoodTrackings.stream()
-				.min((t1, t2) -> t1.getConsumedGram().compareTo(t2.getConsumedGram())).get().getConsumedGram());
-
-		reportResult.setAverage(BigDecimal
-				.valueOf(userFoodTrackings.stream().mapToDouble(t -> t.getConsumedGram().doubleValue()).sum()
-						/ userFoodTrackings.size()));
-
-		reportResult.setTotal(BigDecimal
-				.valueOf(userFoodTrackings.stream().mapToDouble(t -> t.getConsumedGram().doubleValue()).sum()));
+		// Total calories
+		reportResult.setTotal(BigDecimal.valueOf(userFoodTrackings
+				.stream()
+				.mapToDouble(t -> t.getConsumedGram().doubleValue() / 100.0 * t.getFood().getEnergyPerServing().doubleValue())
+				.sum())
+		);
 
 		return reportResult;
 	}
@@ -160,7 +177,13 @@ public class FoodTrackingServiceImpl implements FoodTrackingService {
 		switch (reportType) {
 		
 		case "DAY": {
-			
+			for (int i = 1; i <= 24; i++) {
+				columnDatas.put(
+						AppConstants.TIME_SPACES[i],
+						BigDecimal.valueOf(countCaloriesOfTimeSpacesInDay(i, localDateTime.getHour(), userFoodTrackings))
+				);
+			}
+
 			break;
 		}
 		
@@ -214,12 +237,31 @@ public class FoodTrackingServiceImpl implements FoodTrackingService {
 		return columnDatas;
 	}
 	
+	private double countCaloriesOfTimeSpacesInDay(int upperHourBound, int hour, List<UserFoodTracking> userFoodTrackings) {
+		int lowerHourBound = upperHourBound - 1;
+		LocalTime lowerBound = LocalTime.of(lowerHourBound, 0, 0);
+		LocalTime upperBound = LocalTime.of(upperHourBound - 1, 59, 59);
+		return userFoodTrackings
+				.stream()
+				.filter(t -> (t.getConsumedDatetime().toLocalTime().equals(lowerBound) 
+						|| t.getConsumedDatetime().toLocalTime().isAfter(lowerBound)) &&
+						 (t.getConsumedDatetime().toLocalTime().equals(upperBound)
+						|| t.getConsumedDatetime().toLocalTime().isBefore(upperBound))
+				)
+				.mapToDouble(t -> (t.getConsumedGram().doubleValue() / 100.0) 
+						* (t.getFood().getEnergyPerServing().doubleValue())
+				)
+				.sum();
+	}
+
 	private double countCaloriesOfDayInMonth(int day, int month, List<UserFoodTracking> userFoodTrackings) {
 		return userFoodTrackings
 			.stream()
 			.filter(t -> t.getConsumedDatetime().getMonthValue() == month 
 						&& t.getConsumedDatetime().getDayOfMonth() == day)
-			.mapToDouble(t -> t.getConsumedGram().doubleValue())
+			.mapToDouble(t -> (t.getConsumedGram().doubleValue() / 100.0) 
+					* (t.getFood().getEnergyPerServing().doubleValue())
+			)
 			.sum();
 	}
 	
@@ -228,7 +270,9 @@ public class FoodTrackingServiceImpl implements FoodTrackingService {
 		return userFoodTrackings
 			.stream()
 			.filter(t -> t.getConsumedDatetime().getMonthValue() == month)
-			.mapToDouble(t -> t.getConsumedGram().doubleValue())
+			.mapToDouble(t -> (t.getConsumedGram().doubleValue() / 100.0) 
+					* (t.getFood().getEnergyPerServing().doubleValue())
+			)
 			.sum();
 	}
 
