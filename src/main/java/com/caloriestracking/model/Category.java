@@ -15,6 +15,8 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -25,9 +27,11 @@ import lombok.RequiredArgsConstructor;
 @JsonIdentityInfo(
 		  generator = ObjectIdGenerators.PropertyGenerator.class, 
 		  property = "id")
+@ApiModel(value = "Category model", description = "Danh mục đồ ăn")
 public class Category {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@ApiModelProperty(position = 1, notes = "The database generated Category ID")
 	private Long id;
 	
 	@NotNull(message = "Category name should not be null")

@@ -46,6 +46,11 @@ public class UserServiceImpl implements UserService{
 		return userRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found"));
 	}
+	
+	@Override
+	public User findByUsername(String username) {
+		return accountService.findByUserName(username).getUser();
+	}
 
 	@Override
 	public List<User> findAll() {
@@ -91,6 +96,7 @@ public class UserServiceImpl implements UserService{
 			user.setImage(imageURL);
 		}
 		
+		// Link this user to the account in request object
 		user.setAccount(account);
 		
 		return userRepository.save(user);

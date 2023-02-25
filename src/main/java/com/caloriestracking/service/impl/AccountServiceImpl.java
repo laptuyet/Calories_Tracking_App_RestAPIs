@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.caloriestracking.dto.UserDTO;
@@ -51,6 +52,8 @@ public class AccountServiceImpl implements AccountService{
 	private final UserFavoriteFoodRepository favoriteFoodRepository;
 	
 	private final UserFoodTrackingRepository trackingRepository;
+	
+	private final PasswordEncoder passwordEncoder;
 
 	@Override
 	public Account findByUserName(String username) {
@@ -90,10 +93,15 @@ public class AccountServiceImpl implements AccountService{
 					+ "\n please include 'user' field in this account JSON.");
 		
 		// Mặc định là Role USER
-		if(account.getRole() == null) {
+		if(account.getRole() == null || account.getRole().name().isBlank()) {
 			account.setRole(Role.ROLE_USER);
 		}
 		
+		// Encrypt raw password
+		String rawPwd = account.getPassword();
+		account.setPassword(passwordEncoder.encode(rawPwd));
+		
+		// Link this user to account in request object
 		user.setAccount(account);
 		
 		return accountRepository.save(account);
@@ -106,7 +114,8 @@ public class AccountServiceImpl implements AccountService{
 		
 		Account foundAccount = findByUserName(account.getUsername());
 		
-		foundAccount.setPassword(account.getPassword());
+		// Encrypt raw password
+		foundAccount.setPassword(passwordEncoder.encode(account.getPassword()));
 		
 		if(account.getRole() != null)
 			foundAccount.setRole(account.getRole());

@@ -14,6 +14,8 @@ public interface CategoryService {
 	Category findByCategoryName(String categoryName);
 
 	List<Category> findAll();
+	
+	List<Category> findAll(Integer pageNo, Integer pageSize, String sortBy);
 
 	Category save(Category category, MultipartFile file);
 

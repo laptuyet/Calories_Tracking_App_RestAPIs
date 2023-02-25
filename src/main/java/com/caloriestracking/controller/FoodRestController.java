@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -61,6 +62,7 @@ public class FoodRestController {
 				.collect(Collectors.toList());
 	}
 	
+	
 	@GetMapping("/all")
 	public List<FoodDTO> getAllFoods() {
 		return foodService.findAll()
@@ -81,6 +83,7 @@ public class FoodRestController {
 	}
 	
 	@PostMapping("/create")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<FoodDTO> createFood(
 			@RequestPart("food") String foodJson,
 			@RequestPart(name = "image", required = false) MultipartFile image) 
@@ -93,6 +96,7 @@ public class FoodRestController {
 	}
 	
 	@PutMapping("/update")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<FoodDTO> updateFood(
 			@RequestPart("food") String foodJson,
 			@RequestPart(name = "image", required = false) MultipartFile image) 
@@ -105,6 +109,7 @@ public class FoodRestController {
 	}
 	
 	@DeleteMapping("/delete/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<String> deleteFood(@PathVariable Long id) {
 		return foodService.delete(id);
 	}

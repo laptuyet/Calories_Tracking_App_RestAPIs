@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,6 +38,7 @@ public class UserRestController {
 	private final UserDTOMapper userDTOMapper;
 	
 	@GetMapping("/all")
+	@PreAuthorize("hasRole('ADMIN')")
 	public List<UserDTO> getAllUsers() {
 		return userService.findAll()
 				.stream()
@@ -51,6 +53,7 @@ public class UserRestController {
 	}
 	
 	@GetMapping("/all/paging")
+	@PreAuthorize("hasRole('ADMIN')")
 	public List<UserDTO> getAllUsers(
 			@RequestParam(defaultValue = "0") Integer pageNo,
 			@RequestParam(defaultValue = "5") Integer pageSize,

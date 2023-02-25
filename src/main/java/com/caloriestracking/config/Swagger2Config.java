@@ -32,6 +32,8 @@ public class Swagger2Config {
 				.globalResponseMessage(RequestMethod.GET,
 						ImmutableList.of(new ResponseMessageBuilder()
 								.code(404).message("Not found").responseModel(new ModelRef("Error"))
+								.code(400).message("Bad request").responseModel(new ModelRef("Error"))
+								.code(403).message("Unauthenticated").responseModel(new ModelRef("Error"))
 								.code(500).message("Internal server error").responseModel(new ModelRef("Error"))
 								.build()))
 				.select()
@@ -46,7 +48,7 @@ public class Swagger2Config {
 		return new ApiInfoBuilder()
 				.title("Calories Tracking App REST api :)")
 				.description("Calories Tracking App Document for APIs")
-				.contact(new Contact("phi", "https://www.facebook.com/hoangphi.2104", "tranhoangphi0987@gmail.com"))
+				.contact(new Contact("Phi", "https://www.facebook.com/hoangphi.2104", "tranhoangphi0987@gmail.com"))
 				.license("Apache 2.0").licenseUrl("http://www.apache.org/licenses/LICENSE-2.0.html").version("1.0.0")
 				.build();
 	}
