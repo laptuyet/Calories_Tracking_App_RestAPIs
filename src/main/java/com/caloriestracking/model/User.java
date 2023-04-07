@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -105,7 +106,7 @@ public class User implements UserDetails{
 	private List<UserFavoriteFood> userFavoriteFoods;
 	
 	@ApiModelProperty(position = 13, value = "Danh sách các token của User đó")
-	@OneToMany(mappedBy = "user")
+	@OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
 	@JsonIgnore
 	private List<Token> tokens;
 
