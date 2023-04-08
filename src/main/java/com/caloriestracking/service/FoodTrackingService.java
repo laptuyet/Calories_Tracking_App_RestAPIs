@@ -13,4 +13,6 @@ public interface FoodTrackingService {
 	UserFoodTracking addToTrackingList(Long userId, Long foodId, BigDecimal consumedGram);
 
 	StatisticResponse getReport(Long userId, String dateTime, String reportType);
+
+	String removeFromTrackingList(Long trackingId);
 }

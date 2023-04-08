@@ -292,4 +292,23 @@ public class FoodTrackingServiceImpl implements FoodTrackingService {
 			.sum();
 	}
 
+	@Override
+	public String removeFromTrackingList(Long trackingId) {
+		UserFoodTracking userFoodTracking =  foodTrackingRepository.findById(trackingId)
+				.orElseThrow(()-> new ResourceNotFoundException("Food tracking item with id<" + trackingId +"> is not found"));
+		
+		String msg = "";
+		
+		// Nếu còn trong ngày hiện tại thì cho phép xóa, không thì báo lỗi
+		LocalDateTime ldt = LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+		if (ldt.toLocalDate().isEqual(userFoodTracking.getConsumedDatetime().toLocalDate())) {
+			foodTrackingRepository.delete(userFoodTracking);
+			msg = "Delete food tracking item with id<" + trackingId +"> successfully!";
+		} else {
+			throw new RuntimeException("You only have permission to delete within the day!");
+		}
+		
+		return msg;
+	}
+
 }

@@ -12,6 +12,8 @@ import lombok.Data;
 @AllArgsConstructor
 public class FoodTrackingHistory {
 	
+	private Long id;
+	
 	private FoodDTO food;
 	
 	private BigDecimal consumedGram;

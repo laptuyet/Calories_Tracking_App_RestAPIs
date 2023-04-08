@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -69,6 +70,19 @@ public class FoodTrackingRestController {
 						foodTrackingService.addToTrackingList(userId, foodId, consumedGram)
 				)
 		);
+	}
+	
+	@ApiOperation(value = "Xóa một món ăn khỏi Tracking List của User")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "Xóa thành công",
+					response = String.class),
+			@ApiResponse(code = 400, message = "Thông tin xóa không hợp lệ")
+	})
+	@DeleteMapping("remove/{trackingId}")
+	public ResponseEntity<String> removeFromTrackingList(
+			@ApiParam(value = "ID của Food tracking item cần xóa")
+			@PathVariable Long trackingId) {
+		return ResponseEntity.ok(foodTrackingService.removeFromTrackingList(trackingId));
 	}
 	
 	@ApiOperation(value = "Lấy thông tin thống kê lượng Calories tiêu thụ theo tùy chọn thời gian của User")

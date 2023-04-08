@@ -19,6 +19,7 @@ public class FoodTrackingHistoryDTOMapper implements Function<UserFoodTracking, 
 	@Override
 	public FoodTrackingHistory apply(UserFoodTracking t) {
 		return new FoodTrackingHistory(
+				t.getId(),
 				foodDTOMapper.apply(t.getFood()),
 				t.getConsumedGram(),
 				BigDecimal.valueOf(t.getConsumedGram().doubleValue() / 100.0 * t.getFood().getEnergyPerServing().doubleValue()),
